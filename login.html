@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART - Login</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+</head>
+<body>
+  <div class="container flex items-center justify-center min-h-screen">
+    <div class="card w-full max-w-400">
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold mb-2">SMART</h1>
+        <p class="text-gray-500">Your Intelligent AI Companion</p>
+      </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div class="input-group">
+          <label class="input-label">Email</label>
+          <input type="email" id="email" class="input" placeholder="your@email.com" required>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Password</label>
+          <input type="password" id="password" class="input" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-large">Sign In</button>
+      </form>
+
+      <div class="divider"></div>
+
+      <p class="text-center text-sm">
+        Don't have an account? <a href="/" class="text-primary font-semibold">Sign up</a>
+      </p>
+
+      <div class="mt-4">
+        <button class="btn btn-secondary w-full gap-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="1"></circle>
+            <path d="M4 12a8 8 0 0 1 8-8"></path>
+          </svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js" type="module"></script>
+  <script src="js/theme.js" type="module"></script>
+  <script type="module">
+    import { Auth } from './js/auth.js';
+    const auth = new Auth();
+    
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        await auth.login(email, password);
+        window.location.href = '/dashboard.html';
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>

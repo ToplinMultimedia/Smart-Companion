@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART - Notes</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+  <style>
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-4);
+    }
+    .note-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+    .note-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+    .note-title {
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-2);
+      font-size: var(--font-size-lg);
+    }
+    .note-content {
+      flex: 1;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+    .note-meta {
+      font-size: var(--font-size-xs);
+      color: var(--text-secondary);
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="flex h-screen">
+    <aside class="w-64 bg-surface border-r border-border hidden md:flex flex-col overflow-y-auto">
+      <div class="p-6 border-b border-border">
+        <h1 class="text-2xl font-bold mb-8">SMART</h1>
+        <nav class="space-y-2">
+          <a href="/dashboard.html" class="block p-3 rounded-lg hover:bg-gray-100">📊 Dashboard</a>
+          <a href="/chat.html" class="block p-3 rounded-lg hover:bg-gray-100">💬 Chat</a>
+          <a href="/goals.html" class="block p-3 rounded-lg hover:bg-gray-100">🎯 Goals</a>
+          <a href="/tasks.html" class="block p-3 rounded-lg hover:bg-gray-100">✅ Tasks</a>
+          <a href="/notes.html" class="block p-3 rounded-lg bg-primary text-white">📝 Notes</a>
+          <a href="/projects.html" class="block p-3 rounded-lg hover:bg-gray-100">📁 Projects</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto flex flex-col">
+      <header class="bg-surface border-b border-border sticky top-0 z-10">
+        <div class="container flex-between p-4">
+          <h1 class="text-2xl font-bold">Notes</h1>
+          <div class="flex gap-4">
+            <button class="btn-icon" id="themeToggle">☀️</button>
+            <button class="btn btn-primary" id="newNoteBtn">+ New Note</button>
+            <button class="btn btn-secondary" data-action="logout">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        <div class="notes-grid" id="notesList">
+          <div class="text-center col-span-full py-12 text-gray-400"><p>📝 No notes yet!</p></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="noteModal">
+    <div class="modal animate-slideDown">
+      <h2 class="text-2xl font-bold mb-4">New Note</h2>
+      <form id="noteForm" class="space-y-4">
+        <div class="input-group">
+          <label class="input-label">Title</label>
+          <input type="text" id="noteTitle" class="input" placeholder="Note title" value="Untitled">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Content</label>
+          <textarea id="noteContent" class="textarea" placeholder="Write your note..."></textarea>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary flex-1" id="closeNoteModal">Cancel</button>
+          <button type="submit" class="btn btn-primary flex-1">Save Note</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" type="module"></script>
+  <script src="js/utils.js" type="module"></script>
+  <script src="js/theme.js" type="module"></script>
+  <script type="module">
+    import { api } from './js/api.js';
+    import { showToast, formatDate } from './js/utils.js';
+    
+    let allNotes = [];
+
+    async function loadNotes() {
+      try {
+        allNotes = await api.getNotes();
+        displayNotes();
+      } catch (error) {
+        console.error('Failed to load notes:', error);
+      }
+    }
+
+    function displayNotes() {
+      const container = document.getElementById('notesList');
+      if (allNotes.length === 0) {
+        container.innerHTML = '<div class="text-center col-span-full py-12 text-gray-400"><p>📝 No notes yet!</p></div>';
+        return;
+      }
+
+      container.innerHTML = allNotes.map(note => `
+        <div class="note-card animate-fadeIn" data-id="${note.id}">
+          <div class="note-title">${note.title || 'Untitled'}</div>
+          <div class="note-content">${note.content || 'Empty note'}</div>
+          <div class="note-meta flex-between">
+            <span>${formatDate(note.created_at)}</span>
+            <button class="btn-icon delete-note" data-id="${note.id}" onclick="event.stopPropagation()">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+
+      container.querySelectorAll('.note-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (!e.target.closest('.delete-note')) {
+            editNote(card.dataset.id);
+          }
+        });
+      });
+
+      container.querySelectorAll('.delete-note').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (confirm('Delete this note?')) {
+            await api.deleteNote(btn.dataset.id);
+            loadNotes();
+            showToast('Note deleted', 'success');
+          }
+        });
+      });
+    }
+
+    function editNote(noteId) {
+      const note = allNotes.find(n => n.id === noteId);
+      if (note) {
+        document.getElementById('noteTitle').value = note.title || 'Untitled';
+        document.getElementById('noteContent').value = note.content || '';
+        document.getElementById('noteForm').dataset.id = noteId;
+        document.getElementById('noteModal').classList.add('active');
+      }
+    }
+
+    document.getElementById('newNoteBtn').addEventListener('click', () => {
+      document.getElementById('noteForm').reset();
+      document.getElementById('noteTitle').value = 'Untitled';
+      delete document.getElementById('noteForm').dataset.id;
+      document.getElementById('noteModal').classList.add('active');
+    });
+
+    document.getElementById('closeNoteModal').addEventListener('click', () => {
+      document.getElementById('noteModal').classList.remove('active');
+    });
+
+    document.getElementById('noteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const noteId = document.getElementById('noteForm').dataset.id;
+      const title = document.getElementById('noteTitle').value;
+      const content = document.getElementById('noteContent').value;
+
+      try {
+        if (noteId) {
+          await api.updateNote(noteId, { title, content });
+          showToast('Note updated!', 'success');
+        } else {
+          await api.createNote(title, content);
+          showToast('Note created!', 'success');
+        }
+        document.getElementById('noteModal').classList.remove('active');
+        loadNotes();
+      } catch (error) {
+        showToast('Failed to save note', 'error');
+      }
+    });
+
+    loadNotes();
+  </script>
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>

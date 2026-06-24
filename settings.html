@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART - Settings</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+</head>
+<body>
+  <div class="flex h-screen">
+    <aside class="w-64 bg-surface border-r border-border hidden md:flex flex-col overflow-y-auto">
+      <div class="p-6 border-b border-border">
+        <h1 class="text-2xl font-bold mb-8">SMART</h1>
+        <nav class="space-y-2">
+          <a href="/dashboard.html" class="block p-3 rounded-lg hover:bg-gray-100">📊 Dashboard</a>
+          <a href="/chat.html" class="block p-3 rounded-lg hover:bg-gray-100">💬 Chat</a>
+          <a href="/settings.html" class="block p-3 rounded-lg bg-primary text-white">⚙️ Settings</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto flex flex-col">
+      <header class="bg-surface border-b border-border sticky top-0 z-10">
+        <div class="container flex-between p-4">
+          <h1 class="text-2xl font-bold">Settings</h1>
+          <button class="btn-icon" id="themeToggle">☀️</button>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6 max-w-600">
+        <div class="card mb-6">
+          <h2 class="text-xl font-bold mb-4">Account</h2>
+          <div class="input-group">
+            <label class="input-label">Username</label>
+            <input type="text" id="username" class="input" placeholder="Your username">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Email</label>
+            <input type="email" id="email" class="input" placeholder="your@email.com" disabled>
+          </div>
+          <button class="btn btn-primary w-full" id="updateProfileBtn">Save Changes</button>
+        </div>
+
+        <div class="card mb-6">
+          <h2 class="text-xl font-bold mb-4">Preferences</h2>
+          <div class="input-group">
+            <label class="input-label">Theme</label>
+            <select id="themeSelect" class="select">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="system">System</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card mb-6">
+          <h2 class="text-xl font-bold mb-4 text-danger">Danger Zone</h2>
+          <p class="text-sm text-gray-600 mb-4">These actions cannot be undone.</p>
+          <button class="btn btn-outline w-full" id="logoutBtn" style="color: var(--danger); border-color: var(--danger);">Logout</button>
+          <button class="btn btn-outline w-full mt-2" id="deleteBtn" style="color: var(--danger); border-color: var(--danger);">Delete Account</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/config.js" type="module"></script>
+  <script src="js/utils.js" type="module"></script>
+  <script src="js/theme.js" type="module"></script>
+  <script type="module">
+    import { api } from './js/api.js';
+    import { showToast } from './js/utils.js';
+    
+    async function loadProfile() {
+      try {
+        const profile = await api.getProfile();
+        if (profile) {
+          document.getElementById('username').value = profile.username || '';
+          document.getElementById('email').value = profile.email || '';
+        }
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+      }
+    }
+
+    document.getElementById('updateProfileBtn').addEventListener('click', async () => {
+      try {
+        await api.updateProfile({
+          username: document.getElementById('username').value
+        });
+        showToast('Profile updated!', 'success');
+      } catch (error) {
+        showToast('Failed to update profile', 'error');
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      api.auth.logout();
+    });
+
+    document.getElementById('deleteBtn').addEventListener('click', () => {
+      if (confirm('Are you sure? This cannot be undone.')) {
+        showToast('Account deletion coming soon', 'info');
+      }
+    });
+
+    loadProfile();
+  </script>
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>

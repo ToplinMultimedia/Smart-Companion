@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART - Memory</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+</head>
+<body>
+  <div class="flex h-screen">
+    <aside class="w-64 bg-surface border-r border-border hidden md:flex flex-col overflow-y-auto">
+      <div class="p-6 border-b border-border">
+        <h1 class="text-2xl font-bold mb-8">SMART</h1>
+        <nav class="space-y-2">
+          <a href="/dashboard.html" class="block p-3 rounded-lg hover:bg-gray-100">📊 Dashboard</a>
+          <a href="/chat.html" class="block p-3 rounded-lg hover:bg-gray-100">💬 Chat</a>
+          <a href="/goals.html" class="block p-3 rounded-lg hover:bg-gray-100">🎯 Goals</a>
+          <a href="/tasks.html" class="block p-3 rounded-lg hover:bg-gray-100">✅ Tasks</a>
+          <a href="/notes.html" class="block p-3 rounded-lg hover:bg-gray-100">📝 Notes</a>
+          <a href="/memory.html" class="block p-3 rounded-lg bg-primary text-white">🧠 Memory</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto flex flex-col">
+      <header class="bg-surface border-b border-border sticky top-0 z-10">
+        <div class="container flex-between p-4">
+          <h1 class="text-2xl font-bold">My Memories</h1>
+          <div class="flex gap-4">
+            <button class="btn-icon" id="themeToggle">☀️</button>
+            <button class="btn btn-primary" id="newMemoryBtn">+ Add Memory</button>
+            <button class="btn btn-secondary" data-action="logout">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        <p class="text-gray-600 mb-6">These are things I know about you. I use these to personalize our conversations.</p>
+        <div id="memoriesList" class="space-y-3">
+          <div class="text-center py-12 text-gray-400"><p>🧠 No memories yet!</p></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="memoryModal">
+    <div class="modal animate-slideDown">
+      <h2 class="text-2xl font-bold mb-4">Add Memory</h2>
+      <form id="memoryForm" class="space-y-4">
+        <div class="input-group">
+          <label class="input-label">Type</label>
+          <select id="memoryType" class="select">
+            <option value="preference">My Preferences</option>
+            <option value="interest">My Interests</option>
+            <option value="goal">My Goals</option>
+            <option value="learning">Learning</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">What I should remember *</label>
+          <textarea id="memoryContent" class="textarea" required placeholder="Tell me about yourself..."></textarea>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary flex-1" id="closeMemoryModal">Cancel</button>
+          <button type="submit" class="btn btn-primary flex-1">Save Memory</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" type="module"></script>
+  <script src="js/utils.js" type="module"></script>
+  <script src="js/theme.js" type="module"></script>
+  <script type="module">
+    import { api } from './js/api.js';
+    import { showToast } from './js/utils.js';
+    
+    let allMemories = [];
+
+    async function loadMemories() {
+      try {
+        allMemories = await api.getMemories();
+        displayMemories();
+      } catch (error) {
+        console.error('Failed to load memories:', error);
+      }
+    }
+
+    function displayMemories() {
+      const container = document.getElementById('memoriesList');
+      if (allMemories.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-gray-400"><p>🧠 No memories yet!</p></div>';
+        return;
+      }
+
+      container.innerHTML = allMemories.map(memory => `
+        <div class="card animate-fadeIn">
+          <div class="flex-between mb-2">
+            <span class="badge">${memory.memory_type}</span>
+            <button class="btn-icon delete-memory" data-id="${memory.id}">🗑️</button>
+          </div>
+          <p>${memory.content}</p>
+        </div>
+      `).join('');
+
+      container.querySelectorAll('.delete-memory').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (confirm('Delete this memory?')) {
+            await api.deleteMemory(btn.dataset.id);
+            loadMemories();
+            showToast('Memory deleted', 'success');
+          }
+        });
+      });
+    }
+
+    document.getElementById('newMemoryBtn').addEventListener('click', () => {
+      document.getElementById('memoryModal').classList.add('active');
+    });
+
+    document.getElementById('closeMemoryModal').addEventListener('click', () => {
+      document.getElementById('memoryModal').classList.remove('active');
+    });
+
+    document.getElementById('memoryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api.createMemory(
+          document.getElementById('memoryType').value,
+          document.getElementById('memoryContent').value
+        );
+        showToast('Memory saved!', 'success');
+        document.getElementById('memoryModal').classList.remove('active');
+        document.getElementById('memoryForm').reset();
+        loadMemories();
+      } catch (error) {
+        showToast('Failed to save memory', 'error');
+      }
+    });
+
+    loadMemories();
+  </script>
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>

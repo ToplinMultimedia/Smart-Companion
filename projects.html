@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART - Projects</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+</head>
+<body>
+  <div class="flex h-screen">
+    <aside class="w-64 bg-surface border-r border-border hidden md:flex flex-col overflow-y-auto">
+      <div class="p-6 border-b border-border">
+        <h1 class="text-2xl font-bold mb-8">SMART</h1>
+        <nav class="space-y-2">
+          <a href="/dashboard.html" class="block p-3 rounded-lg hover:bg-gray-100">📊 Dashboard</a>
+          <a href="/chat.html" class="block p-3 rounded-lg hover:bg-gray-100">💬 Chat</a>
+          <a href="/goals.html" class="block p-3 rounded-lg hover:bg-gray-100">🎯 Goals</a>
+          <a href="/tasks.html" class="block p-3 rounded-lg hover:bg-gray-100">✅ Tasks</a>
+          <a href="/notes.html" class="block p-3 rounded-lg hover:bg-gray-100">📝 Notes</a>
+          <a href="/projects.html" class="block p-3 rounded-lg bg-primary text-white">📁 Projects</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto flex flex-col">
+      <header class="bg-surface border-b border-border sticky top-0 z-10">
+        <div class="container flex-between p-4">
+          <h1 class="text-2xl font-bold">Projects</h1>
+          <div class="flex gap-4">
+            <button class="btn-icon" id="themeToggle">☀️</button>
+            <button class="btn btn-primary" id="newProjectBtn">+ New Project</button>
+            <button class="btn btn-secondary" data-action="logout">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="text-center col-span-full py-12 text-gray-400"><p>📁 No projects yet!</p></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="projectModal">
+    <div class="modal animate-slideDown">
+      <h2 class="text-2xl font-bold mb-4">Create Project</h2>
+      <form id="projectForm" class="space-y-4">
+        <div class="input-group">
+          <label class="input-label">Project Name *</label>
+          <input type="text" id="projectName" class="input" required placeholder="Project name">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Description</label>
+          <textarea id="projectDesc" class="textarea" placeholder="What is this project about?"></textarea>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary flex-1" id="closeProjectModal">Cancel</button>
+          <button type="submit" class="btn btn-primary flex-1">Create Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" type="module"></script>
+  <script src="js/utils.js" type="module"></script>
+  <script src="js/theme.js" type="module"></script>
+  <script type="module">
+    import { api } from './js/api.js';
+    import { showToast } from './js/utils.js';
+    
+    let allProjects = [];
+
+    async function loadProjects() {
+      try {
+        allProjects = await api.getProjects();
+        displayProjects();
+      } catch (error) {
+        console.error('Failed to load projects:', error);
+      }
+    }
+
+    function displayProjects() {
+      const container = document.getElementById('projectsList');
+      if (allProjects.length === 0) {
+        container.innerHTML = '<div class="text-center col-span-full py-12 text-gray-400"><p>📁 No projects!</p></div>';
+        return;
+      }
+
+      container.innerHTML = allProjects.map(project => `
+        <div class="card animate-fadeIn">
+          <div class="flex-between mb-3">
+            <h3 class="text-lg font-semibold">${project.name}</h3>
+            <button class="btn-icon delete-project" data-id="${project.id}">🗑️</button>
+          </div>
+          <p class="text-sm text-gray-500 mb-3">${project.description || 'No description'}</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${project.progress || 0}%"></div>
+          </div>
+          <div class="text-sm mt-2">${project.progress || 0}% Complete</div>
+        </div>
+      `).join('');
+
+      container.querySelectorAll('.delete-project').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (confirm('Delete this project?')) {
+            await api.deleteProject(btn.dataset.id);
+            loadProjects();
+            showToast('Project deleted', 'success');
+          }
+        });
+      });
+    }
+
+    document.getElementById('newProjectBtn').addEventListener('click', () => {
+      document.getElementById('projectModal').classList.add('active');
+    });
+
+    document.getElementById('closeProjectModal').addEventListener('click', () => {
+      document.getElementById('projectModal').classList.remove('active');
+    });
+
+    document.getElementById('projectForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api.createProject(
+          document.getElementById('projectName').value,
+          document.getElementById('projectDesc').value
+        );
+        showToast('Project created!', 'success');
+        document.getElementById('projectModal').classList.remove('active');
+        document.getElementById('projectForm').reset();
+        loadProjects();
+      } catch (error) {
+        showToast('Failed to create project', 'error');
+      }
+    });
+
+    loadProjects();
+  </script>
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "smart-ai-platform",
+  "version": "1.0.0",
+  "description": "SMART - Your Intelligent AI Companion",
+  "type": "module",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000",
+    "build": "echo 'No build step needed for vanilla JS'",
+    "deploy": "vercel deploy --prod"
+  },
+  "keywords": ["ai", "chat", "productivity", "supabase"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}

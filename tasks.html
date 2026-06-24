@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART - Tasks</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+  <style>
+    .task-item {
+      display: flex;
+      gap: var(--space-4);
+      padding: var(--space-4);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      align-items: flex-start;
+      transition: all var(--transition-base);
+    }
+    .task-item:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+    }
+    .task-checkbox {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--primary);
+      margin-top: 2px;
+    }
+    .task-content {
+      flex: 1;
+    }
+    .task-title {
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-1);
+    }
+    .task-meta {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      display: flex;
+      gap: var(--space-3);
+    }
+    .priority-high { color: var(--danger); }
+    .priority-medium { color: var(--warning); }
+    .priority-low { color: var(--info); }
+    .task-actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+    .filter-group {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: var(--space-2) var(--space-4);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="flex h-screen">
+    <aside class="w-64 bg-surface border-r border-border hidden md:flex flex-col overflow-y-auto">
+      <div class="p-6 border-b border-border">
+        <h1 class="text-2xl font-bold mb-8">SMART</h1>
+        <nav class="space-y-2">
+          <a href="/dashboard.html" class="block p-3 rounded-lg hover:bg-gray-100">📊 Dashboard</a>
+          <a href="/chat.html" class="block p-3 rounded-lg hover:bg-gray-100">💬 Chat</a>
+          <a href="/goals.html" class="block p-3 rounded-lg hover:bg-gray-100">🎯 Goals</a>
+          <a href="/tasks.html" class="block p-3 rounded-lg bg-primary text-white">✅ Tasks</a>
+          <a href="/notes.html" class="block p-3 rounded-lg hover:bg-gray-100">📝 Notes</a>
+          <a href="/projects.html" class="block p-3 rounded-lg hover:bg-gray-100">📁 Projects</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto flex flex-col">
+      <header class="bg-surface border-b border-border sticky top-0 z-10">
+        <div class="container flex-between p-4">
+          <h1 class="text-2xl font-bold">Tasks</h1>
+          <div class="flex gap-4">
+            <button class="btn-icon" id="themeToggle">☀️</button>
+            <button class="btn btn-primary" id="newTaskBtn">+ New Task</button>
+            <button class="btn btn-secondary" data-action="logout">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all">All Tasks</button>
+          <button class="filter-btn" data-filter="TODO">To Do</button>
+          <button class="filter-btn" data-filter="IN_PROGRESS">In Progress</button>
+          <button class="filter-btn" data-filter="DONE">Completed</button>
+        </div>
+
+        <div id="tasksList" class="space-y-3">
+          <div class="text-center py-12 text-gray-400">
+            <p>📝 No tasks yet. Create your first task!</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- New Task Modal -->
+  <div class="modal-backdrop" id="taskModal">
+    <div class="modal animate-slideDown">
+      <h2 class="text-2xl font-bold mb-4">Create Task</h2>
+      <form id="taskForm" class="space-y-4">
+        <div class="input-group">
+          <label class="input-label">Task Title *</label>
+          <input type="text" id="taskTitle" class="input" required placeholder="What needs to be done?">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Description</label>
+          <textarea id="taskDesc" class="textarea" placeholder="Add details..."></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="input-group">
+            <label class="input-label">Priority</label>
+            <select id="taskPriority" class="select">
+              <option value="LOW">🟢 Low</option>
+              <option value="MEDIUM" selected>🟡 Medium</option>
+              <option value="HIGH">🔴 High</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Due Date</label>
+            <input type="date" id="taskDue" class="input">
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary flex-1" id="closeTaskModal">Cancel</button>
+          <button type="submit" class="btn btn-primary flex-1">Create Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js" type="module"></script>
+  <script src="js/utils.js" type="module"></script>
+  <script src="js/theme.js" type="module"></script>
+  <script type="module">
+    import { api } from './js/api.js';
+    import { showToast } from './js/utils.js';
+    
+    let currentFilter = 'all';
+    let allTasks = [];
+
+    async function loadTasks() {
+      try {
+        allTasks = await api.getTasks();
+        displayTasks();
+      } catch (error) {
+        console.error('Failed to load tasks:', error);
+      }
+    }
+
+    function displayTasks() {
+      const container = document.getElementById('tasksList');
+      let filtered = allTasks;
+      
+      if (currentFilter !== 'all') {
+        filtered = allTasks.filter(t => t.status === currentFilter);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-gray-400"><p>📝 No tasks. Great job!</p></div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(task => `
+        <div class="task-item">
+          <input type="checkbox" class="task-checkbox" ${task.status === 'DONE' ? 'checked' : ''} data-id="${task.id}">
+          <div class="task-content">
+            <div class="task-title ${task.status === 'DONE' ? 'line-through text-gray-400' : ''}">${task.title}</div>
+            <div class="task-meta">
+              <span class="priority-${task.priority?.toLowerCase() || 'medium'}">${task.priority || 'MEDIUM'}</span>
+              ${task.due_date ? `<span>📅 ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
+              <span class="badge">${task.status}</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="btn-icon delete-task" data-id="${task.id}" title="Delete">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+
+      // Checkbox listeners
+      container.querySelectorAll('.task-checkbox').forEach(cb => {
+        cb.addEventListener('change', async (e) => {
+          const id = e.target.dataset.id;
+          const newStatus = e.target.checked ? 'DONE' : 'TODO';
+          await api.updateTask(id, { status: newStatus });
+          loadTasks();
+          showToast(`Task marked as ${newStatus}`, 'success');
+        });
+      });
+
+      // Delete listeners
+      container.querySelectorAll('.delete-task').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          if (confirm('Delete this task?')) {
+            await api.deleteTask(btn.dataset.id);
+            loadTasks();
+            showToast('Task deleted', 'success');
+          }
+        });
+      });
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        displayTasks();
+      });
+    });
+
+    // New task button
+    document.getElementById('newTaskBtn').addEventListener('click', () => {
+      document.getElementById('taskModal').classList.add('active');
+    });
+
+    document.getElementById('closeTaskModal').addEventListener('click', () => {
+      document.getElementById('taskModal').classList.remove('active');
+    });
+
+    // Create task form
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('taskTitle').value;
+      const desc = document.getElementById('taskDesc').value;
+      const priority = document.getElementById('taskPriority').value;
+      const due = document.getElementById('taskDue').value;
+
+      try {
+        await api.createTask(title, desc, priority, due || null);
+        showToast('Task created!', 'success');
+        document.getElementById('taskModal').classList.remove('active');
+        document.getElementById('taskForm').reset();
+        loadTasks();
+      } catch (error) {
+        showToast('Failed to create task', 'error');
+      }
+    });
+
+    // Load tasks on page load
+    loadTasks();
+  </script>
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>
