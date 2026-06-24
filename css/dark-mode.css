@@ -1,0 +1,112 @@
+/* css/dark-mode.css - Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--bg-dark);
+    --surface: var(--surface-dark);
+    --text: var(--text-dark);
+    --text-secondary: var(--text-secondary-dark);
+    --border: var(--border-dark);
+  }
+}
+
+[data-theme="dark"] {
+  --bg: var(--bg-dark);
+  --surface: var(--surface-dark);
+  --text: var(--text-dark);
+  --text-secondary: var(--text-secondary-dark);
+  --border: var(--border-dark);
+}
+
+[data-theme="dark"] body {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .card {
+  background: var(--surface-dark);
+  border-color: var(--border-dark);
+}
+
+[data-theme="dark"] .input,
+[data-theme="dark"] .textarea,
+[data-theme="dark"] .select {
+  background: var(--surface-dark);
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: var(--surface-dark);
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .btn-icon {
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .btn-icon:hover {
+  background: var(--surface-dark);
+}
+
+[data-theme="dark"] .modal {
+  background: var(--surface-dark);
+}
+
+[data-theme="dark"] .toast {
+  background: var(--surface-dark);
+  border-color: var(--border-dark);
+}
+
+[data-theme="dark"] code,
+[data-theme="dark"] pre {
+  background: var(--surface-dark);
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .input:focus,
+[data-theme="dark"] .textarea:focus,
+[data-theme="dark"] .select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+[data-theme="dark"] .divider {
+  border-color: var(--border-dark);
+}
+
+[data-theme="dark"] .badge {
+  background: rgba(124, 58, 237, 0.2);
+  color: var(--accent);
+}
+
+[data-theme="dark"] .alert {
+  border-color: var(--border-dark);
+}
+
+[data-theme="dark"] .spinner {
+  border-color: var(--border-dark);
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] a {
+  color: var(--accent);
+}
+
+[data-theme="dark"] a:hover {
+  color: var(--secondary);
+}

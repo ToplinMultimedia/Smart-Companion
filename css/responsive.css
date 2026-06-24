@@ -1,0 +1,88 @@
+/* css/responsive.css - Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--space-3);
+  }
+
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+
+  h1 { font-size: var(--font-size-3xl); }
+  h2 { font-size: var(--font-size-2xl); }
+  h3 { font-size: var(--font-size-xl); }
+
+  .btn-large {
+    width: 100%;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: block !important;
+  }
+
+  .modal {
+    width: 95%;
+  }
+
+  .toast {
+    bottom: var(--space-2);
+    right: var(--space-2);
+    left: var(--space-2);
+  }
+
+  .header {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .nav-primary {
+    order: -1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--space-2);
+  }
+
+  h1 { font-size: var(--font-size-2xl); }
+  h2 { font-size: var(--font-size-xl); }
+  h3 { font-size: var(--font-size-lg); }
+
+  .card {
+    padding: var(--space-4);
+  }
+
+  .flex-col-mobile {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    padding: 0 var(--space-6);
+  }
+
+  .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+.hidden-mobile {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.hidden-desktop {
+  @media (min-width: 769px) {
+    display: none !important;
+  }
+}
