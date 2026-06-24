@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART - Sign Up</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+    .auth-container {
+      width: 100%;
+      max-width: 400px;
+      padding: var(--space-4);
+    }
+    .auth-card {
+      background: var(--surface);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-xl);
+      animation: slideUp 0.3s ease-out;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: var(--space-6);
+    }
+    .auth-header h1 {
+      font-size: var(--font-size-2xl);
+      margin-bottom: var(--space-2);
+    }
+    .auth-header p {
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+    .password-requirements {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+      margin-bottom: var(--space-4);
+      font-size: var(--font-size-xs);
+    }
+    .requirement {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-1);
+      color: var(--text-secondary);
+    }
+    .requirement.met {
+      color: var(--success);
+    }
+    .requirement-icon {
+      width: 16px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: var(--space-4);
+    }
+    .form-label {
+      display: block;
+      font-weight: var(--font-weight-medium);
+      margin-bottom: var(--space-2);
+      color: var(--text);
+    }
+    .form-input {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      color: var(--text);
+      font-size: var(--font-size-base);
+      transition: border-color var(--transition-fast);
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    .submit-btn {
+      width: 100%;
+      padding: var(--space-3);
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: var(--font-weight-semibold);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: var(--font-size-base);
+    }
+    .submit-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .divider {
+      text-align: center;
+      margin: var(--space-4) 0;
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+    .divider::before {
+      content: '';
+      display: block;
+      height: 1px;
+      background: var(--border);
+      margin-bottom: var(--space-2);
+    }
+    .divider::after {
+      content: '';
+      display: block;
+      height: 1px;
+      background: var(--border);
+      margin-top: var(--space-2);
+    }
+    .oauth-btn {
+      width: 100%;
+      padding: var(--space-3);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: var(--font-weight-medium);
+      transition: all var(--transition-fast);
+      margin-bottom: var(--space-2);
+    }
+    .oauth-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .auth-footer {
+      text-align: center;
+      margin-top: var(--space-6);
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+    }
+    .auth-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+    }
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+      display: none;
+      font-size: var(--font-size-sm);
+    }
+    .error-message.show {
+      display: block;
+    }
+    .success-message {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success);
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+      display: none;
+      font-size: var(--font-size-sm);
+    }
+    .success-message.show {
+      display: block;
+    }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <!-- Header -->
+      <div class="auth-header">
+        <h1>✨ SMART</h1>
+        <p>Create your account</p>
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+
+      <!-- Sign Up Form -->
+      <form id="signupForm">
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-input" 
+            placeholder="your@email.com" 
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            class="form-input" 
+            placeholder="••••••••" 
+            required
+            autocomplete="new-password"
+          >
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            class="form-input" 
+            placeholder="••••••••" 
+            required
+            autocomplete="new-password"
+          >
+        </div>
+
+        <!-- Password Requirements -->
+        <div class="password-requirements">
+          <div class="requirement" id="req-length">
+            <span class="requirement-icon">○</span>
+            <span>At least 8 characters</span>
+          </div>
+          <div class="requirement" id="req-uppercase">
+            <span class="requirement-icon">○</span>
+            <span>One uppercase letter</span>
+          </div>
+          <div class="requirement" id="req-number">
+            <span class="requirement-icon">○</span>
+            <span>One number</span>
+          </div>
+          <div class="requirement" id="req-match">
+            <span class="requirement-icon">○</span>
+            <span>Passwords match</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn" id="submitBtn">
+          Create Account
+        </button>
+      </form>
+
+      <!-- Login Link -->
+      <div class="auth-footer">
+        <p>Already have an account? <a href="/login.html">Sign In</a></p>
+      </div>
+
+      <!-- Footer -->
+      <p style="text-align: center; font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: var(--space-4);">
+        By signing up, you agree to our Terms of Service and Privacy Policy
+      </p>
+    </div>
+  </div>
+
+  <script src="js/config.js" type="module"></script>
+  <script src="js/theme.js" type="module"></script>
+  <script type="module">
+    import { Auth } from './js/auth.js';
+    import { showToast } from './js/utils.js';
+
+    const auth = new Auth();
+    const form = document.getElementById('signupForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirmPassword');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMessage');
+    const successMsg = document.getElementById('successMessage');
+
+    // Password validation
+    function validatePassword(password) {
+      return {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        number: /[0-9]/.test(password),
+        match: password === confirmInput.value && password.length > 0
+      };
+    }
+
+    function updateRequirements() {
+      const password = passwordInput.value;
+      const reqs = validatePassword(password);
+
+      document.getElementById('req-length').classList.toggle('met', reqs.length);
+      document.getElementById('req-uppercase').classList.toggle('met', reqs.uppercase);
+      document.getElementById('req-number').classList.toggle('met', reqs.number);
+      document.getElementById('req-match').classList.toggle('met', reqs.match);
+
+      const allMet = Object.values(reqs).every(v => v);
+      submitBtn.disabled = !allMet;
+
+      return allMet;
+    }
+
+    // Update requirements on input
+    passwordInput.addEventListener('input', updateRequirements);
+    confirmInput.addEventListener('input', updateRequirements);
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      // Clear messages
+      errorMsg.classList.remove('show');
+      successMsg.classList.remove('show');
+
+      // Validate
+      if (!validatePassword(password).length) {
+        showError('Password must be at least 8 characters');
+        return;
+      }
+
+      if (password !== confirmInput.value) {
+        showError('Passwords do not match');
+        return;
+      }
+
+      try {
+        // Disable button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading"></span> Creating account...';
+
+        // Sign up
+        await auth.signup(email, password);
+
+        // Show success
+        showSuccess('Account created! Redirecting to login...');
+
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/login.html';
+        }, 2000);
+      } catch (error) {
+        showError(error.message || 'Failed to create account');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Create Account';
+      }
+    });
+
+    function showError(message) {
+      errorMsg.textContent = message;
+      errorMsg.classList.add('show');
+      window.scrollTo(0, 0);
+    }
+
+    function showSuccess(message) {
+      successMsg.textContent = message;
+      successMsg.classList.add('show');
+    }
+
+    // Initial validation check
+    updateRequirements();
+  </script>
+</body>
+</html>
